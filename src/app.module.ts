@@ -1,7 +1,7 @@
 import Joi from 'joi';
 
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { AuthModule } from './auth/auth.module';
 import { FirebaseModule } from './firebase/firebase.module';
@@ -12,27 +12,40 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: Joi.object({
+        // App
         PORT: Joi.number().port().default(3000),
-        FIREBASE_PROJECT_ID: Joi.string(),
-        FIREBASE_CLIENT_EMAIL: Joi.string(),
-        FIREBASE_PRIVATE_KEY: Joi.string(),
+        // Firebase
+        FIREBASE_PROJECT_ID: Joi.string().required(),
+        FIREBASE_CLIENT_EMAIL: Joi.string().required(),
+        FIREBASE_PRIVATE_KEY: Joi.string().required(),
+        // Database (PostgreSQL)
+        DB_HOST: Joi.string().default('localhost'),
+        DB_PORT: Joi.number().port().default(5432),
+        DB_NAME: Joi.string().required(),
+        DB_USERNAME: Joi.string().required(),
+        DB_PASSWORD: Joi.string().required(),
       }),
       validationOptions: {
         abortEarly: false,
         allowUnknown: true,
       },
     }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DB_HOST,
-      port: process.env.DB_PORT ? +process.env.DB_PORT : 5432,
-      database: process.env.DB_NAME,
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      autoLoadEntities: true,
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        return {
+          type: 'postgres',
+          host: configService.get<string>('DB_HOST'),
+          port: configService.get<number>('DB_PORT'),
+          database: configService.get<string>('DB_NAME'),
+          username: configService.get<string>('DB_USERNAME'),
+          password: configService.get<string>('DB_PASSWORD'),
+          autoLoadEntities: true,
+          synchronize: true,
+        };
+      },
     }),
-    FirebaseModule.forRoot(),
+    FirebaseModule,
     AuthModule,
   ],
   controllers: [],

@@ -1,11 +1,15 @@
-import { Injectable } from '@nestjs/common';
-import { getAuth } from 'firebase-admin/auth';
+import { Inject, Injectable } from '@nestjs/common';
+
+import { Auth } from 'firebase-admin/auth';
+import { FIREBASE_AUTH } from '../../firebase/di/token';
 
 @Injectable()
 export class AuthService {
-  async getEmailUser(uid: string): Promise<string> {
-    const result = await getAuth().getUser(uid);
+  constructor(@Inject(FIREBASE_AUTH) private readonly firebaseAuth: Auth) {}
 
-    return Promise.resolve(result.email ?? 'Cesar');
+  async getEmailUser(uid: string): Promise<string> {
+    const result = await this.firebaseAuth.getUser(uid);
+
+    return Promise.resolve(result.email ?? '');
   }
 }

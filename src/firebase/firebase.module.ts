@@ -1,38 +1,40 @@
-import { DynamicModule, Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { App, cert, getApps, initializeApp } from 'firebase-admin';
+import { Auth, getAuth } from 'firebase-admin/auth';
+import { FIREBASE_AUTH } from './di/token';
 
 const APP_DEFAULT_NAME = '[DEFAULT]';
-export const DI_TOKEN_FIREBASE_ADMIN = 'FIREBASE_ADMIN';
+const FIREBASE_ADMIN = 'FIREBASE_ADMIN';
 
-@Module({})
-export class FirebaseModule {
-  static forRoot(): DynamicModule {
-    return {
-      module: FirebaseModule,
-      global: true,
-      providers: [
-        {
-          provide: DI_TOKEN_FIREBASE_ADMIN,
-          useFactory: (config: ConfigService) => {
-            const app: App | undefined = getApps().find(
-              ({ name }) => name === APP_DEFAULT_NAME,
-            );
+@Global()
+@Module({
+  providers: [
+    {
+      provide: FIREBASE_ADMIN,
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const app: App | undefined = getApps().find(
+          ({ name }) => name === APP_DEFAULT_NAME,
+        );
 
-            if (app) return app;
+        if (app) return app;
 
-            return initializeApp({
-              credential: cert({
-                projectId: config.get<string>('FIREBASE_PROJECT_ID'),
-                privateKey: config.get<string>('FIREBASE_PRIVATE_KEY'),
-                clientEmail: config.get<string>('FIREBASE_CLIENT_EMAIL'),
-              }),
-            });
-          },
-          inject: [ConfigService],
-        },
-      ],
-      exports: [DI_TOKEN_FIREBASE_ADMIN],
-    };
-  }
-}
+        return initializeApp({
+          credential: cert({
+            projectId: configService.get<string>('FIREBASE_PROJECT_ID'),
+            privateKey: configService.get<string>('FIREBASE_PRIVATE_KEY'),
+            clientEmail: configService.get<string>('FIREBASE_CLIENT_EMAIL'),
+          }),
+        });
+      },
+    },
+    {
+      inject: [FIREBASE_ADMIN],
+      provide: FIREBASE_AUTH,
+      useFactory: (app: App): Auth => getAuth(app),
+    },
+  ],
+  exports: [FIREBASE_AUTH],
+})
+export class FirebaseModule {}
