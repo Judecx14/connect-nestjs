@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:18.4
+    restart: always
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    container_name: connect_db
+    volumes:
+      - ./postgres:/var/lib/postgresql

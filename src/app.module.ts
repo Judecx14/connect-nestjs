@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 
 import { AuthModule } from './auth/auth.module';
 import { FirebaseModule } from './firebase/firebase.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   imports: [
@@ -20,6 +21,16 @@ import { FirebaseModule } from './firebase/firebase.module';
         abortEarly: false,
         allowUnknown: true,
       },
+    }),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.DB_HOST,
+      port: process.env.DB_PORT ? +process.env.DB_PORT : 5432,
+      database: process.env.DB_NAME,
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      autoLoadEntities: true,
+      synchronize: true,
     }),
     FirebaseModule.forRoot(),
     AuthModule,
