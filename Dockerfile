@@ -1,24 +1,19 @@
-FROM node:24-alpine3.24
-
-# Set working directory
-RUN mkdir -p /var/www/connect
-WORKDIR /var/www/connect
-
-# Copy project
-COPY . ./var/www/connect
-COPY package.json tsconfig.json tsconfig.build.json /var/www/connect/
-RUN pnpm install --prod
-RUN pnpm build
+# 1. Install deps
+FROM node:24-alpine3.24 AS deps
+RUN apk add --no-cache libc6-compat
+RUN corepack enable && corepack prepare pnpm@latest --activate
+WORKDIR /app
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN pnpm install --frozen-lockfile
 
 
-# Allow execute permission
-RUN adduser --disabled-password connect_user
-RUN chown -R connect_user:connect_user /var/www/connect
-USER connect_user
-
-# Clear cache
-RUN pnpm cache clean --force
+# 2. Runner
+FROM node:24-alpine3.24 AS runner
+RUN corepack enable && corepack prepare pnpm@latest --activate
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . ./
 
 EXPOSE 3000
 
-CMD [ "pnpm","start:prod" ]
+CMD [ "pnpm", "run", "start:dev" ]

@@ -1,14 +1,32 @@
-version: '3'
+volumes:
+  db_data:
 
 services:
   db:
     image: postgres:18.4
+    container_name: connect_db
     restart: always
     ports:
-      - '5432:5432'
+      - '${DB_PORT}:${DB_PORT}'
     environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    container_name: connect_db
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - ./postgres:/var/lib/postgresql
+      - db_data:/var/lib/postgresql
+
+  app:
+    container_name: connect_app
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    ports:
+      - '${PORT}:${PORT}'
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - db
+    tty: true
