@@ -14,19 +14,22 @@ services:
     volumes:
       - db_data:/var/lib/postgresql
 
-  app:
-    container_name: connect_app
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: runner
-    ports:
-      - '${PORT}:${PORT}'
-    env_file:
-      - .env
-    volumes:
-      - .:/app
-      - /app/node_modules
-    depends_on:
-      - db
-    tty: true
+  #app:
+  #  container_name: connect_app
+  #  build:
+  #    context: .
+  #    dockerfile: Dockerfile
+  #    target: runner
+  #  ports:
+  #    - '${PORT}:${PORT}'
+  #  env_file:
+  #    - .env
+  #  environment:
+  #    - CHOKIDAR_USEPOLLING=true
+  #    - WATCHPACK_POLLING=true
+  #  volumes:
+  #    - .:/app
+  #    - /app/node_modules
+  #  depends_on:
+  #    - db
+  #  tty: true

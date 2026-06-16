@@ -15,6 +15,7 @@ export class AuthController {
     const email = await this.authService.getEmailUser(uid);
     return {
       email,
+      hello: 'world!',
     };
   }
 }
