@@ -7,6 +7,7 @@ import { FirebaseModule } from './firebase/firebase.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { AuthModule } from './modules/auth/auth.module';
     FirebaseModule,
     AuthModule,
     UserModule,
+    CommonModule,
   ],
   controllers: [],
   providers: [],
