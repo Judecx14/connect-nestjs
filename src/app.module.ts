@@ -3,9 +3,10 @@ import Joi from 'joi';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
-import { AuthModule } from './auth/auth.module';
 import { FirebaseModule } from './firebase/firebase.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserModule } from './modules/user/user.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     }),
     FirebaseModule,
     AuthModule,
+    UserModule,
   ],
   controllers: [],
   providers: [],

@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { Auth } from 'firebase-admin/auth';
-import { FIREBASE_AUTH } from '../../firebase/di/token';
+import { FIREBASE_AUTH } from '../../../firebase/di/token';
 
 @Injectable()
 export class AuthService {
